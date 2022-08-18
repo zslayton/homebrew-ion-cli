@@ -13,4 +13,15 @@ class IonCli < Formula
     system "cargo", "build", "--release", "--bin", "ion"
     bin.install "target/release/ion"
   end
+
+  test do
+    # Make sure that `ion --version` outputs the expected version number
+    assert_match("ion #{self.version}", shell_output("ion --version"))
+    # Make a simple Ion file with a few values in it
+    (testpath/"example.ion").write "foo true 5. null [1, 2, 3]"
+    # Convert the file to binary Ion and assert that the exit status is 0 (successful)
+    shell_output("ion dump --format binary -o ./example.10n ./example.ion")
+    # Convert the binary Ion file back to text and look for the resolved symbol text `foo`
+    assert_match("foo", shell_output("ion dump --format pretty ./example.10n"))
+  end
 end
